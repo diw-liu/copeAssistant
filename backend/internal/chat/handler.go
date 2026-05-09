@@ -25,6 +25,14 @@ func NewWSHandler(manager *ChatManager) *WSHandler {
 	}
 }
 
+// Handle godoc
+// @Summary WebSocket chat handshake
+// @Description Upgrades HTTP connection to WebSocket for real-time chat messaging
+// @Tags chat
+// @Produce json
+// @Success 101 {string} string "Switching Protocols"
+// @Failure 400 {object} map[string]string
+// @Router /ws [get]
 func (h *WSHandler) Handle(c *gin.Context) {
 	conn, err := h.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {

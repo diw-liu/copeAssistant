@@ -3,6 +3,7 @@ package ai
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	openai "github.com/sashabaranov/go-openai"
@@ -40,9 +41,14 @@ func NewOpenAIService(apiKey string) *OpenAIService {
 	}
 }
 
-func (s *OpenAIService) GenerateReply(ctx context.Context, userMessage string) (string, error) {
+func (s *OpenAIService) GenerateReply(ctx context.Context, userMessage string, mood string) (string, error) {
 	if strings.TrimSpace(userMessage) == "" {
 		return "", errors.New("user message is empty")
+	}
+
+	systemPrompt := copingPhilosophyPrompt
+	if moodHint := moodInstruction(mood); moodHint != "" {
+		systemPrompt = fmt.Sprintf("%s\n\nCurrent user context: %s", copingPhilosophyPrompt, moodHint)
 	}
 
 	if s.client == nil {
@@ -52,7 +58,7 @@ func (s *OpenAIService) GenerateReply(ctx context.Context, userMessage string) (
 	resp, err := s.client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
 		Model: s.model,
 		Messages: []openai.ChatCompletionMessage{
-			{Role: openai.ChatMessageRoleSystem, Content: copingPhilosophyPrompt},
+			{Role: openai.ChatMessageRoleSystem, Content: systemPrompt},
 			{Role: openai.ChatMessageRoleUser, Content: userMessage},
 		},
 		Temperature: 0.7,
@@ -66,4 +72,17 @@ func (s *OpenAIService) GenerateReply(ctx context.Context, userMessage string) (
 	}
 
 	return strings.TrimSpace(resp.Choices[0].Message.Content), nil
+}
+
+func moodInstruction(mood string) string {
+	switch strings.TrimSpace(strings.ToLower(mood)) {
+	case "job hunt":
+		return "The user is focused on job hunt stress. Prioritize actionable job-search strategy, interview confidence, and pacing."
+	case "burnout":
+		return "The user is experiencing burnout. Emphasize recovery, boundaries, and sustainable next steps."
+	case "general stress":
+		return "The user is dealing with general stress. Balance emotional regulation with practical actions."
+	default:
+		return ""
+	}
 }

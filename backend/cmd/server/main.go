@@ -7,8 +7,14 @@ import (
 	"copassistant/internal/ai"
 	"copassistant/internal/chat"
 	"copassistant/internal/server"
+	_ "copassistant/docs"
 )
 
+// @title Copassistant Backend API
+// @version 1.0
+// @description API docs for Copassistant backend.
+// @host localhost:8080
+// @BasePath /
 func main() {
 	apiKey := os.Getenv("OPENAI_API_KEY")
 

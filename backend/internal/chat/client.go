@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"encoding/json"
 	"log"
 	"strings"
 	"time"
@@ -19,6 +20,12 @@ type Client struct {
 	manager *ChatManager
 	conn    *websocket.Conn
 	send    chan []byte
+}
+
+type inboundPayload struct {
+	Type    string `json:"type"`
+	Content string `json:"content"`
+	Mood    string `json:"mood"`
 }
 
 func NewClient(manager *ChatManager, conn *websocket.Conn) *Client {
@@ -50,11 +57,31 @@ func (c *Client) ReadPump() {
 			break
 		}
 
-		trimmed := strings.TrimSpace(string(message))
-		if trimmed == "" {
+		var payload inboundPayload
+		if err := json.Unmarshal(message, &payload); err != nil {
+			c.manager.HandleProtocolError(c, "Invalid websocket payload. Expected JSON.")
 			continue
 		}
-		c.manager.HandleUserMessage(c, trimmed)
+
+		msgType := strings.TrimSpace(payload.Type)
+		switch msgType {
+		case "message":
+			content := strings.TrimSpace(payload.Content)
+			if content == "" {
+				c.manager.HandleProtocolError(c, "Message content cannot be empty.")
+				continue
+			}
+			c.manager.HandleUserMessage(c, content)
+		case "context":
+			mood := strings.TrimSpace(payload.Mood)
+			if mood == "" {
+				c.manager.HandleProtocolError(c, "Context mood cannot be empty.")
+				continue
+			}
+			c.manager.HandleContextSelection(c, mood)
+		default:
+			c.manager.HandleProtocolError(c, "Unknown message type.")
+		}
 	}
 }
 

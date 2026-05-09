@@ -1,6 +1,6 @@
 APP_NAME=copassistant
 
-.PHONY: build run tidy
+.PHONY: build run tidy swagger
 
 build:
 	mkdir -p bin
@@ -11,3 +11,6 @@ run:
 
 tidy:
 	go mod tidy
+
+swagger:
+	go run github.com/swaggo/swag/cmd/swag@v1.16.6 init -g main.go -d cmd/server,internal/chat,internal/server -o docs
