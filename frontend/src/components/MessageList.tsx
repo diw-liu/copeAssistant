@@ -1,17 +1,27 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+import ReactMarkdown from 'react-markdown'
+import rehypeHighlight from 'rehype-highlight'
+import rehypeSanitize from 'rehype-sanitize'
+import remarkGfm from 'remark-gfm'
+
+import { assistantMarkdownComponents } from '../markdown/assistantMarkdown'
 import type { ChatMessage } from '../types/chat'
+import { normalizeAssistantMarkdown } from '../utils/normalizeAssistantMarkdown'
 
 interface MessageListProps {
   messages: ChatMessage[]
 }
 
 const bubbleByRole: Record<ChatMessage['role'], string> = {
-  user: 'ml-auto max-w-[82%] bg-slate-700 text-slate-100',
-  assistant: 'mr-auto max-w-[82%] bg-zinc-800 text-zinc-100',
+  user: 'ml-auto w-fit max-w-[82%] bg-slate-700 text-slate-100',
+  assistant: 'mr-auto w-fit max-w-[82%] bg-zinc-800 text-zinc-100',
   status: 'mx-auto max-w-[90%] bg-zinc-800/50 text-zinc-300 text-sm',
   error: 'mx-auto max-w-[90%] bg-red-900/40 text-red-200 text-sm',
 }
+
+/** Sanitize first, then trusted `rehype-highlight` (recommended in rehype-highlight docs). */
+const assistantRehypePlugins = [rehypeSanitize, rehypeHighlight] as const
 
 export function MessageList({ messages }: MessageListProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -39,7 +49,19 @@ export function MessageList({ messages }: MessageListProps) {
             transition={{ duration: 0.25, ease: 'easeOut' }}
             className={`rounded-2xl px-4 py-3 leading-relaxed shadow-sm ${bubbleByRole[message.role]}`}
           >
-            {message.content}
+            {message.role === 'assistant' ? (
+              <div className="assistant-markdown-root text-sm text-zinc-200 [&_a]:break-words">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[...assistantRehypePlugins]}
+                  components={assistantMarkdownComponents}
+                >
+                  {normalizeAssistantMarkdown(message.content)}
+                </ReactMarkdown>
+              </div>
+            ) : (
+              <span className="whitespace-pre-wrap">{message.content}</span>
+            )}
           </motion.div>
         ))
       )}

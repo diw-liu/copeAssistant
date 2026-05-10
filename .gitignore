@@ -1,3 +1,6 @@
+# Local wisdom file (copy from backend/data/wisdom.txt.example)
+backend/data/wisdom.txt
+
 # Environment / secrets
 .env
 .env.*

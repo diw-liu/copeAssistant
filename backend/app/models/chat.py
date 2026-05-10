@@ -8,11 +8,15 @@ class ChatHistoryItem(BaseModel):
     content: str = Field(..., min_length=1, description="Message content")
 
 
+Persona = Literal["socrates", "lao_tzu", "custom"]
+
+
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, description="Current user message")
     history: list[ChatHistoryItem] = Field(
         default_factory=list, description="Prior turns in chat session"
     )
+    persona: Persona = Field(..., description="Philosopher voice / style for the assistant")
 
 
 class StreamEvent(BaseModel):

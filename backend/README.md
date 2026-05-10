@@ -14,7 +14,7 @@
 
 From `backend/`:
 
-`uvicorn app.main:app --reload`
+`uvicorn app.main:app --reload --port 8080`
 
 The backend will expose:
 - `GET /health`

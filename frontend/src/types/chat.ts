@@ -1,4 +1,5 @@
-export type MoodOption = 'Job Hunt' | 'Burnout' | 'General Stress'
+/** Must match backend Persona literal */
+export type PersonaOption = 'socrates' | 'lao_tzu' | 'custom'
 
 export type ChatMessageRole = 'user' | 'assistant' | 'status' | 'error'
 
@@ -8,19 +9,21 @@ export interface ChatMessage {
   content: string
 }
 
-export interface ClientMessagePayload {
-  type: 'message'
+export interface ChatHistoryItem {
+  role: 'user' | 'assistant'
   content: string
 }
 
-export interface ClientContextPayload {
-  type: 'context'
-  mood: MoodOption
+/** Outbound JSON matching backend ChatRequest */
+export interface ChatRequestPayload {
+  message: string
+  history: ChatHistoryItem[]
+  persona: PersonaOption
 }
 
-export type ClientPayload = ClientMessagePayload | ClientContextPayload
-
-export interface ServerPayload {
-  type: 'assistant' | 'status' | 'error'
-  content: string
-}
+/** Inbound events from backend StreamEvent */
+export type StreamEventPayload =
+  | { type: 'start' }
+  | { type: 'chunk'; content: string | null }
+  | { type: 'done' }
+  | { type: 'error'; message: string | null }

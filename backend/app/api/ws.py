@@ -27,6 +27,7 @@ async def websocket_chat_endpoint(websocket: WebSocket) -> None:
                 async for part in stream_chat_response(
                     user_message=chat_request.message,
                     history=chat_request.history,
+                    persona=chat_request.persona,
                 ):
                     await websocket.send_json(
                         StreamEvent(type="chunk", content=part).model_dump()

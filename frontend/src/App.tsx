@@ -1,11 +1,11 @@
 import { MessageCircleHeart } from 'lucide-react'
 import { MessageInput } from './components/MessageInput'
 import { MessageList } from './components/MessageList'
-import { MoodSelection } from './components/MoodSelection'
+import { PersonaSelection } from './components/PersonaSelection'
 import { useChat } from './hooks/useChat'
 
 function App() {
-  const { messages, isConnected, isLoading, selectedMood, sendMessage, setMood } = useChat()
+  const { messages, isConnected, isLoading, selectedPersona, sendMessage, setPersona } = useChat()
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-slate-900 px-4 py-8 text-zinc-100">
@@ -22,7 +22,7 @@ function App() {
               </p>
             </div>
           </div>
-          <MoodSelection selectedMood={selectedMood} onSelectMood={setMood} />
+          <PersonaSelection selectedPersona={selectedPersona} onSelectPersona={setPersona} />
         </header>
 
         <MessageList messages={messages} />
